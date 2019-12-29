@@ -1,7 +1,9 @@
 package com.example.aquiz;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 public class FragmentQuiz extends Fragment implements View.OnClickListener {
 
     private final static String ARGUMENT_QUESTION = "arg_question";
+    onAnswerSelectedListener onAnswerSelectedListener;
 
     private ArrayList<Button> answerButtons;
     private TextView questionTextView;
@@ -31,6 +34,20 @@ public class FragmentQuiz extends Fragment implements View.OnClickListener {
         args.putParcelable(ARGUMENT_QUESTION, question);
         fragmentQuiz.setArguments(args);
         return fragmentQuiz;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            onAnswerSelectedListener = (onAnswerSelectedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement onAnswerSelectedListener");
+        }
     }
 
     @Override
@@ -52,9 +69,10 @@ public class FragmentQuiz extends Fragment implements View.OnClickListener {
             questionTextView.setText(question.getQuestion());
 //            Log.d(KEYS.LOGS_FRAGMENT, "TextView:" + questionTextView.getText());
             ArrayList<String> answers = question.getShuffleAnswers();
-            Log.d(KEYS.LOGS_FRAGMENT, ""+ answers.size());
+            Log.d(KEYS.LOGS_FRAGMENT, "" + answers.size());
             for (int i = 0; i < answers.size(); i++) {
-                Button btn = new Button(this.getContext(), null, R.style.AnsweButtonStyle);
+                int buttonStyle = R.style.AnswerButtonStyle;
+                Button btn = (Button) getLayoutInflater().inflate(R.layout.button_answer, answersLayout, false);
                 btn.setText(answers.get(i));
                 btn.setTag("btn" + i);
                 btn.setOnClickListener(this);
@@ -89,10 +107,11 @@ public class FragmentQuiz extends Fragment implements View.OnClickListener {
     private void checkIfCorrectAnswer(int buttonNumber) {
         Button btn = answerButtons.get(buttonNumber);
         if (btn.getText().equals(question.getCorrectAnswer())) {
-            btn.setBackgroundResource(R.color.colorCorrectAnswer);
+            btn.setBackgroundResource(R.drawable.rounded_button_green);
             setQuestionResult(true);
         } else {
-            btn.setBackgroundResource(R.color.colorWrongAnswer);
+            btn.setBackgroundResource(R.drawable.rounded_button_red);
+            btn.setTextColor(getResources().getColor(R.color.colorButtonOptional));
             setQuestionResult(false);
         }
         for (Button b : answerButtons) {
@@ -101,6 +120,6 @@ public class FragmentQuiz extends Fragment implements View.OnClickListener {
     }
 
     private void setQuestionResult(boolean result) {
-
+        onAnswerSelectedListener.changeRespondedQuestions(result);
     }
 }

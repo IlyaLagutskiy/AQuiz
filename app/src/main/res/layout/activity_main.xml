@@ -23,8 +23,7 @@
         android:layout_below="@+id/ImageQUIZ"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="150dp"
-        android:background="@drawable/rounded"
-        android:enabled="false"
+        android:background="@drawable/rounded_button_yellow"
         android:paddingHorizontal="30dp"
         android:text="@string/Play"
         android:textColor="@color/colorButtonMain"
@@ -37,7 +36,7 @@
         android:layout_below="@+id/ButtonPlay"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="50dp"
-        android:background="@drawable/rounded"
+        android:background="@drawable/rounded_button_yellow"
         android:paddingHorizontal="30dp"
         android:text="@string/Score"
         android:textColor="@color/colorButtonMain"
@@ -110,6 +109,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:checked="true"
                 android:gravity="center"
                 android:theme="@style/RadioButton" />
 

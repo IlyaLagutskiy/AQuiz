@@ -7,9 +7,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 public class AQuizApiProvider {
@@ -18,6 +20,38 @@ public class AQuizApiProvider {
     private static final String AQUIZ_API_SCORES = "http://aquiz.azurewebsites.net/api/scores";
     private static final String AQUIZ_API_UPDATE_USERDATA = "http://aquiz.azurewebsites.net/api/updateUserData";
     private static final String AQUIZ_API_ABOUT = "http://aquiz.azurewebsites.net/about";
+
+    public ArrayList<Question> getQuestions() {
+        ArrayList<Question> questions = new ArrayList<>();
+        try {
+            JSONObject jsonObject = new ApiRequest().execute(AQUIZ_API_QUESTIONS).get();
+            int questionsCount = jsonObject.getInt("questions_count");
+            int answersCount = jsonObject.getInt("answers_count");
+            Log.d("ParserLog", "" + answersCount);
+            JSONArray qsjson = jsonObject.getJSONArray("questions");
+            JSONObject qjson;
+            for (int i = 0; i < questionsCount; i++) {
+                qjson = qsjson.getJSONObject(i);
+                Question question = new Question(answersCount);
+                question.parseJSON(qjson);
+                questions.add(question);
+            }
+        } catch (Exception ex) {
+            Log.d("AsyncLog", ex.getMessage());
+        }
+        return questions;
+    }
+
+    public void sendQuizScore(String username, int score) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("score", score);
+            json.put("username", username);
+        } catch (Exception ex) {
+            Log.d(KEYS.LOGS_ASYNC, ex.getMessage());
+        }
+        new ApiPost().execute(AQUIZ_API_UPDATE_USERDATA, json.toString());
+    }
 
     private class ApiRequest extends AsyncTask<String, String, JSONObject> {
 
@@ -53,39 +87,61 @@ public class AQuizApiProvider {
                 reader.close();
 
                 JSONObject data = new JSONObject(json.toString());
-                Log.d("JSON", json.toString());
+                Log.d(KEYS.LOGS_ASYNC, "Receiver JSON: " + json.toString());
                 return data;
-            } catch (Exception e) {
-                Log.d("AsyncLog", e.getMessage());
+            } catch (Exception ex) {
+                Log.d(KEYS.LOGS_ASYNC, "Exception: " + ex.getMessage());
                 return null;
             }
         }
     }
 
+    private class ApiPost extends AsyncTask<String, String, Void> {
 
-    public void RunApi() {
-        getQuestions();
-    }
-
-    public ArrayList<Question> getQuestions() {
-        ArrayList<Question> questions = new ArrayList<>();
-        try {
-            JSONObject jsonObject = new ApiRequest().execute(AQUIZ_API_QUESTIONS).get();
-            int questionsCount = jsonObject.getInt("questions_count");
-            int answersCount = jsonObject.getInt("answers_count");
-            Log.d("ParserLog", "" + answersCount);
-            JSONArray qsjson = jsonObject.getJSONArray("questions");
-            JSONObject qjson;
-            for (int i = 0; i < questionsCount; i++) {
-                qjson = qsjson.getJSONObject(i);
-                Question question = new Question(answersCount);
-                question.parseJSON(qjson);
-                questions.add(question);
-            }
-        } catch (Exception ex) {
-            Log.d("AsyncLog", ex.getMessage());
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
         }
-        return questions;
+
+        @Override
+        protected void onPostExecute(Void voids) {
+            super.onPostExecute(voids);
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            try {
+                URL url = new URL(strings[0]);
+                HttpURLConnection connection =
+                        (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type", "application/json; utf-8");
+                connection.setRequestProperty("Accept", "application/json");
+                connection.setDoOutput(true);
+                connection.connect();
+
+                String dataToSend = strings[1];
+
+                DataOutputStream os = new DataOutputStream(connection.getOutputStream());
+                os.writeBytes(dataToSend);
+
+                os.flush();
+                os.close();
+
+                Log.i(KEYS.LOGS_ASYNC, String.valueOf(connection.getResponseCode()));
+                Log.i(KEYS.LOGS_ASYNC, connection.getResponseMessage());
+
+                connection.disconnect();
+            } catch (Exception e) {
+                Log.d(KEYS.LOGS_ASYNC, "Exception: " + e.getMessage());
+            }
+            return null;
+        }
     }
 
 }

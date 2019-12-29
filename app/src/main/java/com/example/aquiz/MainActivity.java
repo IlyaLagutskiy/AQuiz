@@ -1,18 +1,21 @@
 package com.example.aquiz;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RadioGroup;
-import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    int numberOfAnswers;
+    int numberOfAnswers = 2;
+    String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,27 +27,17 @@ public class MainActivity extends AppCompatActivity {
         RadioGroup radioGroup = findViewById(R.id.radioGroup);
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 switch (checkedId) {
                     case R.id.Easy:
-                        play.setEnabled(true);
                         numberOfAnswers = 2;
-                        Toast.makeText(getApplicationContext(), "" + numberOfAnswers,
-                                Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.Medium:
-                        play.setEnabled(true);
                         numberOfAnswers = 3;
-                        Toast.makeText(getApplicationContext(), "" + numberOfAnswers,
-                                Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.Hard:
-                        play.setEnabled(true);
                         numberOfAnswers = 4;
-                        Toast.makeText(getApplicationContext(), "" + numberOfAnswers,
-                                Toast.LENGTH_SHORT).show();
                         break;
 
                     default:
@@ -56,25 +49,52 @@ public class MainActivity extends AppCompatActivity {
         play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    Intent intentQuiz = new Intent(MainActivity.this, Quiz.class);
-                    intentQuiz.putExtra(KEYS.NUMBER_OF_ANSWERS, numberOfAnswers);
-                    startActivity(intentQuiz);
-                }
-                catch(Exception ex){
-                    Log.d(KEYS.LOGS_MAIN, ex.getMessage());
-                }
+                askUsernameAndRun();
             }
         });
 
         score.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intentScore = new Intent(MainActivity.this, Score.class);
-                startActivity(intentScore);
+                //Intent intentScore = new Intent(MainActivity.this, Score.class);
+                //startActivity(intentScore);
+                //new AQuizApiProvider().sendQuizScore("ilya1", 100);
 
             }
         });
     }
+
+    private void startQuiz() {
+        Intent intentQuiz = new Intent(MainActivity.this, Quiz.class);
+        intentQuiz.putExtra(KEYS.NUMBER_OF_ANSWERS, numberOfAnswers);
+        intentQuiz.putExtra(KEYS.USERNAME, username);
+        startActivity(intentQuiz);
+    }
+
+    private void askUsernameAndRun() {
+        try {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            final EditText editText = new EditText(this);
+            editText.setText("");
+            builder.setTitle("Username")
+                    .setCancelable(false)
+                    .setPositiveButton("START QUIZ", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            username = editText.getText().toString();
+                            Log.d(KEYS.LOGS_MAIN, "username: " + username);
+                            if(username.matches(""))
+                                username = "user";
+                            Log.d(KEYS.LOGS_MAIN, "username: " + username);
+                            startQuiz();
+                        }
+                    });
+            builder.setView(editText);
+            AlertDialog alert = builder.create();
+            alert.show();
+        } catch (Exception ex) {
+            Log.d(KEYS.LOGS_MAIN, ex.getMessage());
+        }
+    }
+
 
 }

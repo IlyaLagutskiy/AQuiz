@@ -4,8 +4,8 @@
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#000000</color>
     <color name="colorButtonMain">#F4511E</color>
+    <color name="colorButtonOptional">#F4D01E</color>
     <color name="colorNormal">#1E88E5</color>
     <color name="colorActivated">#3949AB</color>
-    <color name="colorWrongAnswer">#EB3F3F</color>
-    <color name="colorCorrectAnswer">#49F049</color>
+
 </resources>
