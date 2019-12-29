@@ -48,16 +48,8 @@ public class Question implements Parcelable {
         return question;
     }
 
-    public ArrayList<String> getAnswers() {
-        return answers;
-    }
-
     public String getCorrectAnswer() {
         return correctAnswer;
-    }
-
-    public int getAnswersCount() {
-        return answersCount;
     }
 
     public void setAnswersCount(int answersCount) {
@@ -72,7 +64,6 @@ public class Question implements Parcelable {
             for (int i = 1; i <= answersCountInJson; i++) {
                 answers.add(answersObj.getString("ans" + i));
             }
-//            Log.d(KEYS.LOGS_PARSER, question);
         } catch (Exception ex) {
             Log.d(KEYS.LOGS_PARSER, ex.getMessage());
         }

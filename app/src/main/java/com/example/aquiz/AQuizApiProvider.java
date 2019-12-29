@@ -2,6 +2,10 @@ package com.example.aquiz;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.util.Pair;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -9,10 +13,15 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.Key;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class AQuizApiProvider {
 
@@ -27,7 +36,6 @@ public class AQuizApiProvider {
             JSONObject jsonObject = new ApiRequest().execute(AQUIZ_API_QUESTIONS).get();
             int questionsCount = jsonObject.getInt("questions_count");
             int answersCount = jsonObject.getInt("answers_count");
-            Log.d("ParserLog", "" + answersCount);
             JSONArray qsjson = jsonObject.getJSONArray("questions");
             JSONObject qjson;
             for (int i = 0; i < questionsCount; i++) {
@@ -37,9 +45,28 @@ public class AQuizApiProvider {
                 questions.add(question);
             }
         } catch (Exception ex) {
-            Log.d("AsyncLog", ex.getMessage());
+            Log.d(KEYS.LOGS_ASYNC, ex.getMessage());
         }
         return questions;
+    }
+
+    public ArrayList<UserData> getScore(){
+        ArrayList<UserData> userData = new ArrayList<>();
+        try {
+            JSONObject jsonObject = new ApiRequest().execute(AQUIZ_API_SCORES).get();
+            int usersCount = jsonObject.getInt("users_count");
+            JSONObject users = jsonObject.getJSONObject("users");
+            Map<String, Integer> usersMap = new Gson().fromJson(
+                    users.toString(), new TypeToken<HashMap<String, Integer>>() {}.getType()
+            );
+            for (Map.Entry<String, Integer> entry: usersMap.entrySet()){
+                UserData data = new UserData(entry.getKey(), entry.getValue());
+                userData.add(data);
+            }
+        } catch (Exception ex) {
+            Log.d(KEYS.LOGS_ASYNC, ex.getMessage());
+        }
+        return userData;
     }
 
     public void sendQuizScore(String username, int score) {
@@ -53,7 +80,7 @@ public class AQuizApiProvider {
         new ApiPost().execute(AQUIZ_API_UPDATE_USERDATA, json.toString());
     }
 
-    private class ApiRequest extends AsyncTask<String, String, JSONObject> {
+    private static class ApiRequest extends AsyncTask<String, String, JSONObject> {
 
         @Override
         protected void onPreExecute() {
@@ -96,7 +123,7 @@ public class AQuizApiProvider {
         }
     }
 
-    private class ApiPost extends AsyncTask<String, String, Void> {
+    private static class ApiPost extends AsyncTask<String, String, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -127,8 +154,8 @@ public class AQuizApiProvider {
 
                 String dataToSend = strings[1];
 
-                DataOutputStream os = new DataOutputStream(connection.getOutputStream());
-                os.writeBytes(dataToSend);
+                OutputStreamWriter os = new OutputStreamWriter(connection.getOutputStream(), "UTF-8");
+                os.write(dataToSend);
 
                 os.flush();
                 os.close();

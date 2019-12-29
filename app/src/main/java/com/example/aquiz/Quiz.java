@@ -29,6 +29,7 @@ public class Quiz extends FragmentActivity implements onAnswerSelectedListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_quiz);
         initiate();
     }
 
@@ -41,7 +42,6 @@ public class Quiz extends FragmentActivity implements onAnswerSelectedListener {
         Intent intent = getIntent();
         answersCount = intent.getIntExtra(KEYS.NUMBER_OF_ANSWERS, 4);
         username = intent.getStringExtra(KEYS.USERNAME);
-        setContentView(R.layout.activity_quiz);
         questions = new ArrayList<>();
         questions = new AQuizApiProvider().getQuestions();
         pager = findViewById(R.id.viewPager);

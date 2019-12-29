@@ -56,10 +56,8 @@ public class MainActivity extends AppCompatActivity {
         score.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Intent intentScore = new Intent(MainActivity.this, Score.class);
-                //startActivity(intentScore);
-                //new AQuizApiProvider().sendQuizScore("ilya1", 100);
-
+                Intent intentScore = new Intent(MainActivity.this, Score.class);
+                startActivity(intentScore);
             }
         });
     }
